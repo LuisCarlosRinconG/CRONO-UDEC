@@ -123,64 +123,17 @@ def editar(actividad_buscada):
     if publicacion and autor and fecha and comentario:
         actividades.update_one({'publicacion': actividad_buscada}, 
                             {'$set': {'publicacion' : publicacion, 'autor': autor, 'fecha' : fecha, 'comentario': comentario}}) # update_one() necesita de al menos dos parametros para funcionar
-        return redirect(url_for('inicio'))
+        return redirect(url_for('perfil'))
     else:
         return "Error de actualización"
     
 #Eliminar actividad
-@app.route('/eliminar_actividad/<string:actividad_buscada>', methods = ['POST'])
+@app.route('/eliminar_actividad/<string:actividad_buscada>', methods=['POST'])
 def eliminar(actividad_buscada):
     actividades = con_bd['Actividades']
-    # Se hace uso de delete_one para borrar los datos de la DB personas donde el dato que se elimina es el que se para como argumento para nombre
-    actividades.delete_one({ 'nombre': actividad_buscada})
-    # Creamos un redireccionamiento que redirija a la vista index
+    actividades.delete_one({'publicacion': actividad_buscada})
     return redirect(url_for('perfil'))
 
 if __name__ == '__main__':
     app.register_error_handler(404, error_404)
     app.run(debug = True, port = 2001)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-'''
-# En este caso se eliminara atravez de la URL
-# Ruta para eliminar datos en la DB donde la ruta se llama eliminar_persona y recibe un parametro llamado nombre_persona
-@app.route('/eliminar_usuarios/<string:usuario_user>')
-def eliminar(usuario_user):
-    usuarios = con_bd['Usuarios']
-    # Se hace uso de delete_one para borrar los datos de la DB personas donde el dato que se elimina es el que se para como argumento para nombre
-    usuarios.delete_one({ 'usuario': usuario_user})
-    # Creamos un redireccionamiento que redirija a la vista index
-    return redirect(url_for('registro'))
-
-#Editar o actualizar el contenido 
-@app.route('/editar_usuarios/<string:usuario_user>', methods = ['POST'])
-def editar(usuario_user):
-    usuarios = con_bd['Usuarios']
-    # Se realiza el mismo proceso de inserción y extracción para poder actualizar los datos
-    usuario = request.form['usuario']
-    roll = request.form['roll']
-    password = request.form['password']
-    # Utilizaremos la función update_one()
-    if usuario and roll and password:
-        usuarios.update_one({'usuario': usuario_user}, 
-                            {'$set': {'usuario' : usuario , 'roll': roll, 'password': password}}) # update_one() necesita de al menos dos parametros para funcionar
-        return redirect(url_for('registro'))
-    else:
-        return "Error de actualización"
-
-'''

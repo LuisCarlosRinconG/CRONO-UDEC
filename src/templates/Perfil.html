@@ -31,21 +31,30 @@
                         <h5 class="text-center">Datos de usuario</h5>
                     </div>
                     <div class="card-body">
-                        <form action="/guardar_personas" method="POST">
-                            <label>Nº Cedula</label>
-                            <input type="text" class="form-control mb-3" name="id">
-                            <label>Nombre</label>
-                            <input type="text" class="form-control mb-3" name="nombre">
-                            <label>Apellido</label>
-                            <input type="text" class="form-control mb-3" name="apellido">
-                            <label>Telefono</label>
-                            <input type="text" class="form-control mb-3" name="telefono">
-                            <label>Cargo</label>
-                            <input type="text" class="form-control mb-3" name="cargo">
-                            <label>Sexo</label>
-                            <input type="text" class="form-control mb-3" name="sexo">
-                            <button class="btn btn-primary" type="submit">Guardar</button>
-                        </form>
+                        <div class="container">
+                        </div>
+                        <div class="container">
+                            <table class="table table-horizontal">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Cumpleaños</th>
+                                        <th>Rol</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="horizontal-row">
+                                        {% for user in usuarios %}
+                                            <td>{{ user.nombre }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.cumple }}</td>
+                                            <td>{{ user.roll }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,29 +68,6 @@
                                     <section class="box">
                                         <img src="static/img/16.png" width="180" alt="" class="box-img">
                                     </section>
-                                    {% for persona in personas %}
-                                        <div class="col">
-                                            <li class="list-group-item mb-3">
-                                                <form action="/editar_persona/{{ persona.id }}" method="POST">
-                                                    <small>Nº Ceduda</small>
-                                                    <input type="text" class="form-control" value="{{ persona.id }}" name="id">
-                                                    <small>Nombre</small>
-                                                    <input type="text" class="form-control" value="{{ persona.nombre }}" name="nombre">
-                                                    <small>Apellido</small>
-                                                    <input type="text" class="form-control" value="{{ persona.apellido }}" name="apellido">
-                                                    <small>Telefono</small>
-                                                    <input type="text" class="form-control" value="{{ persona.telefono }}" name="telefono">
-                                                    <small>Cargo</small>
-                                                    <input type="text" class="form-control" value="{{ persona.cargo }}" name="cargo">
-                                                    <small>Sexo</small>
-                                                    <input type="text" class="form-control" value="{{ persona.sexo }}" name="sexo">
-                                                    <button class="btn btn-primary btn-sm" type="submit">Editar</button>
-                                                    <a href="{{ url_for('eliminar', id_persona = persona.id) }}" class="btn btn-danger btn-sm">Eliminar</a>
-                                                    
-                                                </form>
-                                            </li>
-                                        </div>
-                                    {% endfor %}
                                 </div>
                             </ul>
                         </div>
@@ -97,27 +83,18 @@
                         <h2>Publicaciones</h2>
                         <section class="zona_historico">
                             <div class="table-responsive">
-                                <table class="table table-striped" id="tabla_resultados">
-                                    <thead class="cabecera">
-                                        <tr>
-                                            <th style="width: 30%;">Publicación</th>
-                                            <th style="width: 10%;">Autor</th>
-                                            <th style="width: 10%;">Fecha</th>
-                                            <th style="width: 10%;">Comentarios</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for admin in actividades %}
-                                            <tr>
-                                                <td>{{ admin.publicacion }}</td>
-                                                <td>{{ admin.autor }}</td>
-                                                <td>{{ admin.fecha }}</td>
-                                                <td>{{ admin.comentario }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                {% for admin in actividades %}
+                                <form action="/editar_actividad/{{ admin.publicacion }}" method="post">
+                                    <input type="text" name="publicacion" value="{{ admin.publicacion }}">
+                                    <input type="text" name="autor" value="{{ admin.autor }}">
+                                    <input type="text" name="fecha" value="{{ admin.fecha }}">
+                                    <input type="text" name="comentario" value="{{ admin.comentario }}">
+                                    <button type="submit">Actualizar</button>
 
+                                    <a href="{{ url_for('eliminar', actividad_buscada=admin.publicacion) }}" onclick="return confirm('¿Está seguro de eliminar el documento con el nombre {{ admin.publicacion }}?')">Eliminar</a>
+                                    <hr>
+                                </form>
+                            {% endfor %}
                             </div>
                         </section>
                     </article>

@@ -82,3 +82,15 @@ footer{
     margin: 20px 0 0 0;
     color: #ffffff;
 }
+
+/* Estilos CSS */
+.horizontal-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.horizontal-row td {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 8px;
+}
