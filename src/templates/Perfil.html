@@ -89,6 +89,42 @@
                 </div>
             </div>
         </div>
+
+        <br><br>
+            <div class="contenedor_datos">
+                <div class="area_graficos">
+                    <article>
+                        <h2>Publicaciones</h2>
+                        <section class="zona_historico">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tabla_resultados">
+                                    <thead class="cabecera">
+                                        <tr>
+                                            <th style="width: 30%;">Publicación</th>
+                                            <th style="width: 10%;">Autor</th>
+                                            <th style="width: 10%;">Fecha</th>
+                                            <th style="width: 10%;">Comentarios</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for admin in actividades %}
+                                            <tr>
+                                                <td>{{ admin.publicacion }}</td>
+                                                <td>{{ admin.autor }}</td>
+                                                <td>{{ admin.fecha }}</td>
+                                                <td>{{ admin.comentario }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </section>
+                    </article>
+                </div>
+            </div>
+            <br><br>
+            
     </div>
     <footer>
         <div class="contenedor-footer">
@@ -111,6 +147,9 @@
                 <p><a href="https://github.com/cristian34823">Cristian David Chiguasuque</a></p>
                 <p><a href="https://linktr.ee/ThePolanco">Jeison Stiven Polanco</a></p>
             </div>
+
+            
+
         </div>
         <h2 class="titulo-final">&copy; Crono-Udec | CRONOUDEC</h2>
     </footer>

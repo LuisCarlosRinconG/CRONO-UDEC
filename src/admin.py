@@ -11,7 +11,7 @@ class Admin:
     def formato_doc(self):
         return{
             'publicacion':self.publicacion,
-            'autorn': self.autor,
+            'autor': self.autor,
             'fecha':self.fecha,
             'comentario': self.comentario
         }

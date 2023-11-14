@@ -13,12 +13,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-
-@app.route('/perfil')
-def perfil():
-    return render_template('Perfil.html')
-
-
 # Crear usuario
 @app.route('/registro')
 def registro():
@@ -78,6 +72,19 @@ def inicio():
     ActividadesRegistradas = actividades.find()
     return render_template('inicio.html', actividades=ActividadesRegistradas)
 
+@app.route('/perfil')
+def perfil():
+    actividades = con_bd['Actividades']
+    # Obtener el nombre del usuario de la sesión
+    autor = session.get('usuario')
+
+    if autor:
+        # Filtrar las actividades por el nombre del usuario
+        ActividadesRegistradas = actividades.find({'autor': autor})
+        return render_template('perfil.html', actividades=ActividadesRegistradas)
+    else:
+        flash('Error: Usuario no autenticado', 'error')
+        return redirect(url_for('inicio'))
 
 # Ruta de error 404
 def error_404(error):
@@ -85,18 +92,20 @@ def error_404(error):
 
 
 # Ruta para guardar los datos de la actividades de la DB
-@app.route('/agregarActividad', methods = ['POST'])
+@app.route('/agregarActividad', methods=['POST'])
 def agregarActividad():
-    acividades = con_bd['Actividades']
-    publicacion= request.form['publicacion']
-    autor = request.form['autor']
+    actividades = con_bd['Actividades']
+    publicacion = request.form['publicacion']
     fecha = request.form['fecha']
     comentario = request.form['comentario']
 
+    # Obtener el nombre del usuario de la sesión
+    autor = session.get('usuario')
+
     if publicacion and autor and fecha and comentario:
         admin = Admin(publicacion, autor, fecha, comentario)
-        #insert_one para crear un documento en Mongo
-        acividades.insert_one(admin.formato_doc())
+        # insert_one para crear un documento en Mongo
+        actividades.insert_one(admin.formato_doc())
         return redirect(url_for('inicio'))
     else:
         return "Error"
@@ -105,18 +114,27 @@ def agregarActividad():
 #Editar o actualizar el contenido de la actividad
 @app.route('/editar_actividad/<string:actividad_buscada>', methods = ['POST'])
 def editar(actividad_buscada):
-    acividades = con_bd['Actividades']
+    actividades = con_bd['Actividades']
     publicacion= request.form['publicacion']
     autor = request.form['autor']
     fecha = request.form['fecha']
     comentario = request.form['comentario']
     # Utilizaremos la función update_one()
     if publicacion and autor and fecha and comentario:
-        acividades.update_one({'publicacion': actividad_buscada}, 
+        actividades.update_one({'publicacion': actividad_buscada}, 
                             {'$set': {'publicacion' : publicacion, 'autor': autor, 'fecha' : fecha, 'comentario': comentario}}) # update_one() necesita de al menos dos parametros para funcionar
         return redirect(url_for('inicio'))
     else:
         return "Error de actualización"
+    
+#Eliminar actividad
+@app.route('/eliminar_actividad/<string:actividad_buscada>', methods = ['POST'])
+def eliminar(actividad_buscada):
+    actividades = con_bd['Actividades']
+    # Se hace uso de delete_one para borrar los datos de la DB personas donde el dato que se elimina es el que se para como argumento para nombre
+    actividades.delete_one({ 'nombre': actividad_buscada})
+    # Creamos un redireccionamiento que redirija a la vista index
+    return redirect(url_for('perfil'))
 
 if __name__ == '__main__':
     app.register_error_handler(404, error_404)
