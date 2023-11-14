@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for,session,flash
 from config import *
 from user import User
 from admin import Admin
@@ -12,6 +12,11 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/perfil')
+def perfil():
+    return render_template('Perfil.html')
 
 
 # Crear usuario
@@ -29,13 +34,12 @@ def agregarUser():
     usuarios = con_bd['Usuarios']
     nombre = request.form['nombre']
     email = request.form['email']
-    departamento = request.form['departamento']
     cumple = request.form['cumple']
     password = request.form['password']
-    roll=' '
+    roll=request.form['roll']
 
-    if nombre and email and departamento and cumple and password and roll:
-        user = User(nombre, email, departamento, cumple, password, roll)
+    if nombre and email and cumple and password and roll:
+        user = User(nombre, email, cumple, password, roll)
         #insert_one para crear un documento en Mongo
         usuarios.insert_one(user.formato_doc())
         return redirect(url_for('registro'))
@@ -47,141 +51,70 @@ def login():
     # Lógica para mostrar la página de inicio de sesión
     return render_template('login.html')
 
+
+app.secret_key = 'cronO-UdEc'
+
+
 #Validación de usuario
 @app.route('/validar', methods = ['POST'])
 def validar():
-    # Obtener datos del formulario
     email = request.form['email']
     password = request.form['password']
-    roll='admin'
-    roll2='usuario'
-    
-    # Realizar la búsqueda en la base de datos para verificar la autenticación
+
     usuarios = con_bd['Usuarios']
-    user_Admin = usuarios.find_one({"email": email,"password": password,"roll":roll})
-    user_Usuario = usuarios.find_one({"email": email,"password": password,"roll":roll2})
-    buscador= usuarios.find_one({"departamento": 'desarrollador'})
-    
-    if user_Admin:
-        acividades = con_bd['Actividades']
-        ActividadesRegistradas = acividades.find()
-        return render_template('admin.html', acividades = ActividadesRegistradas)
-    elif user_Usuario:
-        equipo_usuario = user_Usuario.get("departamento", "")
+    user_data = usuarios.find_one({"email": email, "password": password})
 
-        if equipo_usuario:
-            actividades = con_bd['Actividades']
-            AcividadesRegistradas = actividades.find({"equipo": equipo_usuario})
-            return render_template('usuario.html', actividades=AcividadesRegistradas)
-        else:
-            return "Error"
-        
-        
+    if user_data:
+        # Autenticación exitosa, almacenar el usuario en la sesión
+        session['usuario'] = email
+        return redirect(url_for('inicio'))
     else:
-        # Autenticación fallida, mostrar un mensaje de error
-        return "Error de autenticación, Contraseña o usuario incorrectos o espere que se le sea delegado un roll"
-    
+        flash('Error de autenticación, email o Contraseña incorrecta', 'error')
+        return redirect(url_for('login'))
 
-#Actualizar comentario de la actividad
-@app.route('/Añadir_Comentario/<string:actividad_buscada>', methods = ['POST'])
-def Añadir_Comentario(actividad_buscada):
-    acividades = con_bd['Actividades']
-    comentarios=request.form['comentarios']
-    # Utilizaremos la función update_one()
-    if comentarios:
-        acividades.update_one({'actividad': actividad_buscada}, 
-                            {'$set': {'comentarios': comentarios}}) # update_one() necesita de al menos dos parametros para funcionar
-                            
-        previous_url = request.form['previous_url']
-        
-        return f"""
-        <script>
-            alert('Comentario actualizado exitosamente');
-            window.location.href = '{previous_url}';  // Redirige a la URL anterior almacenada en el campo oculto
-        </script>
-        """
-    else:
-        return "Error de actualización"
+@app.route('/inicio')
+def inicio():
+    actividades = con_bd['Actividades']
+    ActividadesRegistradas = actividades.find()
+    return render_template('inicio.html', actividades=ActividadesRegistradas)
 
-# Ruta de editar aacividad
-@app.route('/usuarioBusqueda/<string:actividad_buscada>', methods = ['POST'])
-def usuarioBusqueda(actividad_buscada):
-
-    acividades = con_bd['Actividades']
-    actividad= request.form['actividad']
-    descripcion = request.form['descripcion']
-    equipo = request.form['equipo']
-    fechaI = request.form['fechaI']
-    fechaF = request.form['fechaF']
-    estado = request.form['estado']
-    comentarios=request.form['comentarios']
-
-    if actividad and descripcion and equipo and fechaI and fechaF and estado and comentarios:
-        admin = Admin(actividad, descripcion, equipo, fechaI, fechaF, estado, comentarios)
-        #insert_one para crear un documento en Mongo
-        acividades.update_one({'actividad': actividad_buscada}, 
-                            {'$set': {'actividad' : actividad, 'descripcion': descripcion, 'equipo': equipo,'fechaI' : fechaI, 'fechaF': fechaF, 'estado': estado, 'comentarios': comentarios}}) # update_one() necesita de al menos dos parametros para funcionar
-        return redirect(url_for('usuario'))
-    else:
-        return "Error"
 
 # Ruta de error 404
 def error_404(error):
     return render_template('error_404.html'), 404
 
 
-"""# Ruta de administrador
-@app.route('/admin')
-def admin():
-    acividades = con_bd['Actividades']
-    ActividadesRegistradas = acividades.find()
-    return render_template('admin.html', acividades = ActividadesRegistradas)"""
-
 # Ruta para guardar los datos de la actividades de la DB
 @app.route('/agregarActividad', methods = ['POST'])
 def agregarActividad():
     acividades = con_bd['Actividades']
-    actividad= request.form['actividad']
-    descripcion = request.form['descripcion']
-    equipo = request.form['equipo']
-    fechaI = request.form['fechaI']
-    fechaF = request.form['fechaF']
-    estado = request.form['estado']
-    comentarios=request.form['comentarios']
+    publicacion= request.form['publicacion']
+    autor = request.form['autor']
+    fecha = request.form['fecha']
+    comentario = request.form['comentario']
 
-    if actividad and descripcion and equipo and fechaI and fechaF and estado and comentarios:
-        admin = Admin(actividad, descripcion, equipo, fechaI, fechaF, estado, comentarios)
+    if publicacion and autor and fecha and comentario:
+        admin = Admin(publicacion, autor, fecha, comentario)
         #insert_one para crear un documento en Mongo
         acividades.insert_one(admin.formato_doc())
-        return redirect(url_for('admin'))
+        return redirect(url_for('inicio'))
     else:
         return "Error"
-
-#Ruta para la pantalla de datos donde se muestra la data consultada
-@app.route('/fechaBuscada',methods = ['POST'])
-def Read():
-    actividades = con_bd['Actividades']
-    fechabuscada = request.form['fechaI']
-    query={"fechaI":fechabuscada}
-    AcividadesRegistradas=actividades.find(query)
-    return render_template('datos.html', actividades = AcividadesRegistradas)
+    
 
 #Editar o actualizar el contenido de la actividad
 @app.route('/editar_actividad/<string:actividad_buscada>', methods = ['POST'])
 def editar(actividad_buscada):
     acividades = con_bd['Actividades']
-    actividad= request.form['actividad']
-    descripcion = request.form['descripcion']
-    equipo = request.form['equipo']
-    fechaI = request.form['fechaI']
-    fechaF = request.form['fechaF']
-    estado = request.form['estado']
-    comentarios=request.form['comentarios']
+    publicacion= request.form['publicacion']
+    autor = request.form['autor']
+    fecha = request.form['fecha']
+    comentario = request.form['comentario']
     # Utilizaremos la función update_one()
-    if actividad and descripcion and equipo and fechaI and fechaF and estado and comentarios:
-        acividades.update_one({'actividad': actividad_buscada}, 
-                            {'$set': {'actividad' : actividad, 'descripcion': descripcion, 'equipo': equipo,'fechaI' : fechaI, 'fechaF': fechaF, 'estado': estado, 'comentarios': comentarios}}) # update_one() necesita de al menos dos parametros para funcionar
-        return redirect(url_for('admin'))
+    if publicacion and autor and fecha and comentario:
+        acividades.update_one({'publicacion': actividad_buscada}, 
+                            {'$set': {'publicacion' : publicacion, 'autor': autor, 'fecha' : fecha, 'comentario': comentario}}) # update_one() necesita de al menos dos parametros para funcionar
+        return redirect(url_for('inicio'))
     else:
         return "Error de actualización"
 

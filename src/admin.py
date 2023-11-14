@@ -1,23 +1,17 @@
 # Crear y almacenar objetos en la base de datos
 
 class Admin:
-    def __init__(self, actividad, descripcion, equipo, fechaI, fechaF, estado, comentarios):
-        self.actividad= actividad
-        self.descripcion= descripcion
-        self.equipo = equipo
-        self.fechaI = fechaI
-        self.fechaF = fechaF
-        self.estado=estado
-        self.comentarios=comentarios
+    def __init__(self, publicacion, autor,fecha, comentario):
+        self.publicacion= publicacion
+        self.autor= autor
+        self.fecha = fecha
+        self.comentario = comentario
     
     # Metodo para almacenar los documentos
     def formato_doc(self):
         return{
-            'actividad':self.actividad,
-            'descripcion': self.descripcion,
-            'equipo':self.equipo,
-            'fechaI':self.fechaI,
-            'fechaF': self.fechaF,
-            'estado':self.estado,
-            'comentarios':self.comentarios
+            'publicacion':self.publicacion,
+            'autorn': self.autor,
+            'fecha':self.fecha,
+            'comentario': self.comentario
         }
